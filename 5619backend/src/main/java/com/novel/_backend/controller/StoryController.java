@@ -17,7 +17,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:5173") // 允许跨域
+@CrossOrigin(origins = "http://localhost:5173")
 public class StoryController {
 
     @Autowired
@@ -42,26 +42,19 @@ public class StoryController {
             String backgroundImage = (String) storyRequest.get("backgroundImage");
             String description = (String) storyRequest.get("storyBackground");
 
-            // 获取 charactersBackground 数据，这里是一个 List<Map<String, String>> 类型
             List<Map<String, String>> charactersList = (List<Map<String, String>>) storyRequest
                     .get("charactersBackground");
 
-            // 调用 AI 服务生成故事
             String story = aiStoryService.generateStory(storyName, description, charactersList);
 
-            // 去除非故事内容
             String cleanedStory = cleanStory(story);
 
-            // 将生成的故事保存到 Story 表中
             Story newStory = new Story();
             newStory.setTitle(storyName);
-            newStory.setThema(cleanedStory); // 假设 'Thema' 字段用于存储故事内容
-            newStory.setPublished(false); // 默认未发布
-            newStory.setBackgroundImage(backgroundImage); // 修改此处的拼写
-            // newStory.setOwner(); // 假设设置一个示例的 ownerId，实际使用时应根据当前用户的 ID 设置
-            // storyRepository.save(newStory);
+            newStory.setThema(cleanedStory);
+            newStory.setPublished(false);
+            newStory.setBackgroundImage(backgroundImage);
 
-            // 返回生成的故事给前端
             return new ResponseEntity<>(Map.of("story", cleanedStory), HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace(); // 打印异常以便调试
@@ -76,21 +69,19 @@ public class StoryController {
         for (Story story : stories) {
             System.out.println("Story: " + story.getTitle() + ", is_published: " + story.isPublished());
         }
-        return new ResponseEntity<>(stories, HttpStatus.OK);  // 返回所有字段，包括 is_published
+        return new ResponseEntity<>(stories, HttpStatus.OK); 
     }
 
-    // 根据 ID 获取故事详情
     @GetMapping("/story/{id}")
     public ResponseEntity<Story> getStoryById(@PathVariable int id) {
-        Optional<Story> story = storyRepository.findById(id); // 根据 ID 查找故事
+        Optional<Story> story = storyRepository.findById(id); 
 
-        // 输出日志并根据查找结果返回不同的响应
         if (story.isPresent()) {
-            System.out.println("Found story with ID: " + id); // 日志输出：找到故事
-            return new ResponseEntity<>(story.get(), HttpStatus.OK); // 返回找到的故事和 200 OK 状态
+            System.out.println("Found story with ID: " + id); 
+            return new ResponseEntity<>(story.get(), HttpStatus.OK); 
         } else {
-            System.out.println("Story not found with ID: " + id); // 日志输出：未找到故事
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 返回 404 NOT FOUND 状态
+            System.out.println("Story not found with ID: " + id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -101,11 +92,9 @@ public class StoryController {
         if (storyOpt.isPresent()) {
             Story story = storyOpt.get();
             
-            // 从请求体中获取新的主题并更新
             String newThema = request.get("thema");
             story.setThema(newThema);
 
-            // 保存更新后的故事
             storyRepository.save(story);
             return new ResponseEntity<>("Story thema updated successfully!", HttpStatus.OK);
         } else {
@@ -129,16 +118,15 @@ public class StoryController {
         List<String> allTags = new ArrayList<>();
         List<String> tagsList = storyRepository.findAllTags();
 
-        // 将 tags 字段中逗号分隔的标签分解为单独的标签并去重
         Set<String> uniqueTags = new HashSet<>();
         for (String tags : tagsList) {
             if (tags != null && !tags.isEmpty()) {
                 for (String tag : tags.split(",")) {
-                    uniqueTags.add(tag.trim());  // 去除空格并添加到集合
+                    uniqueTags.add(tag.trim()); 
                 }
             }
         }
-        allTags.addAll(uniqueTags); // 将去重的标签集合转换为列表
+        allTags.addAll(uniqueTags);
 
         return new ResponseEntity<>(allTags, HttpStatus.OK);
     }

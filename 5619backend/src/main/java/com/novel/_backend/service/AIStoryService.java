@@ -30,7 +30,6 @@ public class AIStoryService {
      */
     public String generateStory(String storyName, String description, List<Map<String, String>> characterActionsList) {
         try {
-            // 将 List<Map<String, String>> 转换为 Map<String, String>
             Map<String, String> characterActions = new HashMap<>();
             for (Map<String, String> character : characterActionsList) {
                 String name = character.get("name");
